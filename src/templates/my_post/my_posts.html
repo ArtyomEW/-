@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мои посты</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        body {
+            background-color: #0a0a0a;
+            color: #e0e0e0;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .posts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .post-card {
+            position: relative;
+            background: #1a1a1a;
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: transform 0.2s;
+            border: 1px solid #2a2a2a;
+            overflow: visible;
+        }
+
+        .post-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .post-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .post-title {
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+            color: #fff;
+        }
+
+        .post-description {
+            color: #a0a0a0;
+            line-height: 1.5;
+            margin-bottom: 1rem;
+        }
+
+        .error-message {
+            text-align: center;
+            color: #ff4444;
+            font-size: 1.5rem;
+            margin-top: 3rem;
+        }
+
+        .header {
+            text-align: center;
+            padding: 2rem 0;
+            border-bottom: 1px solid #2a2a2a;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            letter-spacing: 2px;
+            background: linear-gradient(45deg, #00ff88, #00a3ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .back-button {
+            position: absolute;
+            left: 2rem;
+            top: 2rem;
+            padding: 0.75rem 1.5rem;
+            background-color: #2a2a2a;
+            color: #e0e0e0;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            border: 1px solid #3a3a3a;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .back-button:hover {
+            background-color: #3a3a3a;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .back-button svg {
+            width: 18px;
+            height: 18px;
+            fill: currentColor;
+        }
+
+        .header {
+            position: relative;
+            padding: 4rem 0 2rem;
+            border-bottom: 1px solid #2a2a2a;
+            text-align: center;
+        }
+
+        /* Стили для кнопки добавления поста */
+        .add-post-btn {
+            display: block;
+            margin: 2rem auto;
+            padding: 1rem 2rem;
+            background: linear-gradient(45deg, #00a3ff, #00ff88);
+            color: #0a0a0a;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 600;
+            text-align: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 163, 255, 0.3);
+            border: none;
+            cursor: pointer;
+            max-width: 300px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+        }
+
+        .add-post-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 163, 255, 0.4);
+            background: linear-gradient(45deg, #00ff88, #00a3ff);
+        }
+
+        .add-post-btn i {
+            font-size: 1.2rem;
+        }
+
+        @media (max-width: 768px) {
+            .back-button {
+                left: 1rem;
+                top: 1rem;
+                padding: 0.5rem 1rem;
+                font-size: 0.9rem;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .add-post-btn {
+                padding: 0.8rem 1.5rem;
+                font-size: 0.9rem;
+                max-width: 250px;
+            }
+        }
+
+        .comments-btn {
+            background: #2a2a2a;
+            color: #e0e0e0;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .comments-btn:hover {
+            background: #3a3a3a;
+        }
+
+        .comments-container {
+            position: absolute;
+            left: 0;
+            right: 0;
+            margin-top: 0.5rem;
+            padding: 0 1rem;
+            background: #252525;
+            border-radius: 8px;
+            display: none;
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 1;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .comments-container::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            left: 20px;
+            width: 16px;
+            height: 16px;
+            background: #252525;
+            transform: rotate(45deg);
+            z-index: -1;
+        }
+
+        .comment {
+            padding: 0.75rem;
+            background: #1e1e1e;
+            border-radius: 6px;
+            margin-bottom: 0.5rem;
+        }
+
+        .comment:last-child {
+            margin-bottom: 0;
+        }
+
+        .comment-email {
+            color: #00a3ff;
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+
+        .comment-text {
+            color: #d0d0d0;
+        }
+
+        .loading {
+            color: #888;
+            font-style: italic;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .delete-comment-btn {
+            background: #ff4444;
+            color: white;
+            border: none;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 0.5rem;
+            font-size: 0.8rem;
+            transition: background 0.2s;
+        }
+
+        .delete-comment-btn:hover {
+            background: #cc0000;
+        }
+            .post-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        /* Стили для кнопки удаления */
+        .delete-post-btn {
+            background: #ff4444;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            flex-shrink: 0;
+        }
+
+        .delete-post-btn:hover {
+            background: #cc0000;
+        }
+        .posts-grid {
+        display: flex; /* Меняем grid на flex */
+        flex-direction: column; /* Располагаем посты в колонку */
+        gap: 2rem;
+        margin-top: 2rem;
+    }
+
+    .post-card {
+        position: relative;
+        background: #1a1a1a;
+        border-radius: 12px;
+        padding: 1.5rem;
+        transition: transform 0.2s;
+        border: 1px solid #2a2a2a;
+        overflow: visible;
+        display: flex; /* Добавляем flex для расположения контента и кнопок */
+        justify-content: space-between; /* Распределяем пространство */
+    }
+
+    .post-content {
+        flex: 1; /* Контент занимает всё доступное пространство */
+        padding-right: 1.5rem; /* Отступ от кнопок */
+    }
+
+    .post-actions {
+        display: flex;
+        flex-direction: column; /* Кнопки в колонку */
+        gap: 10px;
+        min-width: 150px; /* Минимальная ширина для кнопок */
+    }
+
+    /* Стили для кнопки изменения */
+    .edit-post-btn {
+        background: #3a3a3a;
+        color: #e0e0e0;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        flex-shrink: 0;
+    }
+
+    .edit-post-btn:hover {
+        background: #4a4a4a;
+    }
+
+    /* Адаптация для мобильных */
+    @media (max-width: 768px) {
+        .post-card {
+            flex-direction: column;
+        }
+        
+        .post-content {
+            padding-right: 0;
+            margin-bottom: 1rem;
+        }
+        
+        .post-actions {
+            flex-direction: row;
+            min-width: auto;
+        }
+    }
+     /* Существующие стили остаются без изменений */
+
+    .posts-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+        margin-top: 2rem;
+    }
+
+    .post-card {
+        position: relative;
+        background: #1a1a1a;
+        border-radius: 12px;
+        padding: 1.5rem;
+        transition: transform 0.2s;
+        border: 1px solid #2a2a2a;
+        overflow: visible;
+        display: flex;
+        flex-direction: column; /* Меняем на вертикальное расположение */
+    }
+
+    .post-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 1rem; /* Отступ от основного контента */
+    }
+
+    .post-content {
+        flex: 1;
+        margin-bottom: 1rem; /* Отступ перед кнопкой комментариев */
+    }
+
+    .post-actions {
+        display: flex;
+        gap: 10px;
+        min-width: 150px;
+        justify-content: flex-end; /* Выравнивание кнопок по правому краю */
+    }
+
+    .post-footer {
+        margin-top: auto; /* Прижимаем к низу карточки */
+    }
+
+    /* Стили для кнопки изменения */
+    .edit-post-btn {
+        background: #3a3a3a;
+        color: #e0e0e0;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        flex-shrink: 0;
+    }
+
+    .edit-post-btn:hover {
+        background: #4a4a4a;
+    }
+
+    /* Адаптация для мобильных */
+    @media (max-width: 768px) {
+        .post-header {
+            flex-direction: column;
+        }
+        
+        .post-actions {
+            margin-top: 1rem;
+            justify-content: flex-start;
+        }
+    }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <a href="/posts" class="back-button">
+            <svg viewBox="0 0 24 24">
+                <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+            </svg>
+            Назад
+        </a>
+        <h1>Мои посты</h1>
+    </div>
+    
+    <div class="container">
+        <a href="/post" class="add-post-btn">
+            <i class="fas fa-plus-circle"></i> Добавить пост
+        </a>
+        
+        <div class="posts-grid" id="postsContainer">
+            <!-- Посты будут здесь -->
+        </div>
+        <div id="errorMessage" class="error-message"></div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const postsContainer = document.getElementById('postsContainer');
+            const errorMessage = document.getElementById('errorMessage');
+
+            async function loadComments(postId, container) {
+                const loader = document.createElement('div');
+                loader.className = 'loading';
+                loader.textContent = 'Загрузка комментариев...';
+                container.innerHTML = '';
+                container.appendChild(loader);
+                container.style.display = 'block';
+
+                try {
+                    const response = await fetch(`comments/get_comments/${postId}`);
+                    if (!response.ok) throw new Error('Ошибка загрузки');
+                    
+                    const comments = await response.json();
+                    container.innerHTML = '';
+
+                    if (comments.length === 0) {
+                        const emptyMsg = document.createElement('div');
+                        emptyMsg.className = 'comment';
+                        emptyMsg.textContent = 'Комментариев пока нет';
+                        container.appendChild(emptyMsg);
+                        return;
+                    }
+
+                    comments.forEach(comment => {
+                        const commentDiv = document.createElement('div');
+                        commentDiv.className = 'comment';
+                        commentDiv.innerHTML = `
+                            <div class="comment-email">${comment.user_email}</div>
+                            <div class="comment-text">${comment.comment}</div>
+                            <button class="delete-comment-btn" 
+                                    data-comment-id="${comment.id}" 
+                                    data-post-id="${postId}">
+                                Удалить
+                            </button>
+                        `;
+                        container.appendChild(commentDiv);
+                    });
+                } catch (error) {
+                    container.innerHTML = '<div class="comment">Ошибка загрузки комментариев</div>';
+                }
+            }
+
+            postsContainer.addEventListener('click', async (e) => {
+                if (e.target.classList.contains('comments-btn')) {
+                    const btn = e.target;
+                    const postId = btn.dataset.postId;
+                    const container = btn.nextElementSibling;
+                    const isOpen = container.style.display === 'block';
+
+                    document.querySelectorAll('.comments-container').forEach(c => {
+                        if (c !== container) {
+                            c.style.display = 'none';
+                            c.previousElementSibling.classList.remove('active');
+                        }
+                    });
+
+                    if (isOpen) {
+                        container.style.display = 'none';
+                        btn.textContent = 'Посмотреть комментарии';
+                        btn.classList.remove('active');
+                    } else {
+                        container.style.display = 'block';
+                        btn.classList.add('active');
+                        btn.textContent = 'Скрыть комментарии';
+                        if (container.innerHTML === '') {
+                            await loadComments(postId, container);
+                        }
+                    }
+                }
+            });
+
+            postsContainer.addEventListener('click', async (e) => {
+                if (e.target.classList.contains('delete-comment-btn')) {
+                    const btn = e.target;
+                    const commentId = btn.dataset.commentId;
+                    const postId = btn.dataset.postId;
+                    const postCard = btn.closest('.post-card');
+                    const commentsContainer = postCard.querySelector('.comments-container');
+
+                    try {
+                        const response = await fetch(`/comments/${commentId}`, {
+                            method: 'DELETE'
+                        });
+                        
+                        if (!response.ok) {
+                            const errorText = await response.text();
+                            throw new Error(errorText || 'Ошибка удаления');
+                        }
+                        
+                        await loadComments(postId, commentsContainer);
+                    } catch (error) {
+                        console.error('Ошибка удаления комментария:', error);
+                        alert(error.message || 'Не удалось удалить комментарий');
+                    }
+                }
+            });
+
+            try {
+                const response = await fetch('posts/get_my_posts');
+                
+                if (!response.ok) throw new Error('Ошибка сети');
+
+                const data = await response.json();
+
+                if (data.status === "error") {
+                    errorMessage.textContent = 'Нужно войти в систему';
+                    postsContainer.innerHTML = '';
+                    return;
+                }
+
+                if (Array.isArray(data) && data.length > 0) {
+                    postsContainer.innerHTML = data.map(post => `
+                <div class="post-card">
+                    <div class="post-header">
+                        <div class="post-content">
+                            ${post.file_name ? `
+                                <img src="/static/photo/${encodeURIComponent(post.file_name)}" 
+                                     alt="${post.name}" 
+                                     class="post-image">
+                            ` : ''}
+                            <h2 class="post-title">${post.name}</h2>
+                            <p class="post-description">${post.description}</p>
+                        </div>
+                        <div class="post-actions">
+                            <button class="edit-post-btn" data-post-id="${post.id}">
+                                <i class="edit-icon">✏️</i> Изменить
+                            </button>
+                            <button class="delete-post-btn" data-post-id="${post.id}">
+                                <i class="delete-icon">🗑️</i> Удалить
+                            </button>
+                        </div>
+                    </div>
+                    <div class="post-footer">
+                        <button class="comments-btn" data-post-id="${post.id}"
+                                data-show-text="Посмотреть комментарии" 
+                                data-hide-text="Скрыть комментарии">
+                            Посмотреть комментарии
+                        </button>
+                        <div class="comments-container"></div>
+                    </div>
+                </div>
+                    `).join('');
+                } else {
+                    errorMessage.textContent = 'Постов не найдено';
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+                errorMessage.textContent = 'Произошла ошибка при загрузке постов';
+            }
+        });
+        
+        // Обработчик для кнопки удаления поста
+    postsContainer.addEventListener('click', async (e) => {
+    const deleteBtn = e.target.closest('.delete-post-btn');
+    if (deleteBtn) {
+        e.preventDefault();
+        const postId = deleteBtn.dataset.postId;
+        
+        if (confirm('Вы уверены, что хотите удалить этот пост?')) {
+            try {
+                const response = await fetch(`/posts/${postId}`, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    // Удаляем карточку поста из DOM
+                    deleteBtn.closest('.post-card').remove();
+                    
+                    // Проверяем, остались ли посты
+                    if (postsContainer.children.length === 0) {
+                        errorMessage.textContent = 'Постов не найдено';
+                    }
+                } else {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || 'Ошибка удаления поста');
+                }
+            } catch (error) {
+                console.error('Ошибка удаления поста:', error);
+                alert(error.message || 'Не удалось удалить пост');
+            }
+        }
+    }
+});
+
+
+    postsContainer.addEventListener('click', (e) => {
+    const editBtn = e.target.closest('.edit-post-btn');
+    if (editBtn) {
+        e.preventDefault();
+        const postId = editBtn.dataset.postId;
+        window.location.href = `/post/ed/${postId}`;
+    }
+        });
+    </script>
+</body>
+</html>

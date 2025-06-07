@@ -1,14 +1,19 @@
+from repositories.comments import CommentsRepository
+from repositories.message import MessageRepository
+from repositories.users import UsersRepository
+from repositories.posts import PostRepository
+from db.db import async_session_maker
 from abc import ABC, abstractmethod
 from typing import Type
 
-from db.db import async_session_maker
-from repositories.users import UsersRepository
 
-
-# https://github1s.com/cosmicpython/code/tree/chapter_06_uow
 class IUnitOfWork(ABC):
     users: Type[UsersRepository]
-    
+    posts: Type[MessageRepository]
+    comments: Type[CommentsRepository]
+    posts: Type[PostRepository]
+
+
     @abstractmethod
     def __init__(self):
         ...
@@ -38,7 +43,9 @@ class UnitOfWork:
         self.session = self.session_factory()
 
         self.users = UsersRepository(self.session)
-
+        self.comments = CommentsRepository(self.session)
+        self.posts = PostRepository(self.session)
+        self.message = MessageRepository(self.session)
 
     async def __aexit__(self, *args):
         await self.rollback()

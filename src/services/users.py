@@ -3,14 +3,21 @@ from utils.unitofwork import IUnitOfWork
 
 
 class UsersService:
-    async def add_user(self, uow: IUnitOfWork, user: UserSchemaAdd):
-        user_dict = user.model_dump()
+    @staticmethod
+    async def add_user(uow: IUnitOfWork, **filter_by):
         async with uow:
-            user_id = await uow.users.add_one(user_dict)
+            user_id = await uow.users.add_one(**filter_by)
             await uow.commit()
             return user_id
 
-    async def get_users(self, uow: IUnitOfWork):
+    @staticmethod
+    async def get_users(uow: IUnitOfWork):
         async with uow:
             users = await uow.users.find_all()
             return users
+
+    @staticmethod
+    async def get_one_user(uow: IUnitOfWork, **filter_by):
+        async with uow:
+            user = await uow.users.find_one(**filter_by)
+            return user

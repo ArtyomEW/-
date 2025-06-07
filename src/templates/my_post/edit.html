@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Добавить пост</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        /* ... (ваши существующие стили без изменений) ... */
+        :root {
+            --bg-color: #0f172a;
+            --surface-color: #1e293b;
+            --primary-color: #818cf8;
+            --text-color: #f8fafc;
+            --hover-color: #6366f1;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 640px;
+            margin: 0 auto;
+            background: var(--surface-color);
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+        .back-btn:hover {
+            background: rgba(129, 140, 248, 0.1);
+        }
+
+        .back-btn svg {
+            width: 1.25rem;
+            height: 1.25rem;
+        }
+
+        h1 {
+            font-size: 1.875rem;
+            font-weight: 600;
+            margin-left: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #94a3b8;
+        }
+
+        input, 
+        textarea,
+        .file-input {
+            width: 100%;
+            padding: 0.875rem;
+            background: #334155;
+            border: 2px solid #475569;
+            border-radius: 0.75rem;
+            color: var(--text-color);
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        input:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.2);
+        }
+
+        .file-input {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .file-input input[type="file"] {
+            opacity: 0;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            cursor: pointer;
+        }
+
+        .file-input span {
+            display: block;
+            color: #94a3b8;
+        }
+
+        button[type="submit"] {
+            width: 100%;
+            background: var(--primary-color);
+            color: white;
+            padding: 1rem;
+            border: none;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        button[type="submit"]:hover {
+            background: var(--hover-color);
+            transform: translateY(-2px);
+        }
+
+        .error {
+            color: #f87171;
+            margin-top: 0.5rem;
+            font-size: 0.875rem;
+            display: none;
+        }
+
+        .success {
+            color: #4ade80;
+            margin: 1rem 0;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: var(--transition);
+        }
+
+        .success.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        @media (max-width: 640px) {
+            body {
+                padding: 1rem;
+            }
+            
+            .container {
+                padding: 1.5rem;
+                border-radius: 0.75rem;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+        }
+        .file-name {
+            color: var(--primary-color);
+            margin-top: 0.5rem;
+            font-size: 0.875rem;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="/my_posts" class="back-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                </svg>
+                Назад
+            </a>
+            <h1>Изменить пост</h1>
+        </div>
+
+        <form id="addPostForm">
+            <div class="form-group">
+                <label for="name">Название поста</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="description">Описание</label>
+                <textarea id="description" name="description" rows="4" required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Изображение</label>
+                <div class="file-input">
+                    <input type="file" id="file" name="file" accept="image/*" required>
+                    <span id="fileSpan">Выберите файл или перетащите сюда</span>
+                </div>
+                <div id="fileName" class="file-name"></div>
+                <div id="fileError" class="error"></div>
+            </div>
+
+            <div id="formError" class="error"></div>
+            <div id="formSuccess" class="success"></div>
+
+            <button type="submit">Изменить</button>
+        </form>
+    </div>
+
+    <script>
+        
+
+        document.getElementById('addPostForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('name').value;
+            const description = document.getElementById('description').value;
+            const fileInput = document.getElementById('file');
+            const file = fileInput.files[0];
+            
+            const errorDiv = document.getElementById('formError');
+            const fileErrorDiv = document.getElementById('fileError');
+            const successDiv = document.getElementById('formSuccess');
+
+            // Сброс ошибок
+            errorDiv.style.display = 'none';
+            fileErrorDiv.style.display = 'none';
+            successDiv.classList.remove('active');
+
+            // Валидация
+            let isValid = true;
+            
+            if (!name) {
+                errorDiv.textContent = 'Название поста обязательно';
+                errorDiv.style.display = 'block';
+                isValid = false;
+            }
+            
+            if (!description) {
+                errorDiv.textContent = 'Описание обязательно';
+                errorDiv.style.display = 'block';
+                isValid = false;
+            }
+            
+            // Валидация файла
+            if (!file) {
+                fileErrorDiv.textContent = 'Изображение обязательно';
+                fileErrorDiv.style.display = 'block';
+                isValid = false;
+            } else if (!file.type.match('image.*')) {
+                fileErrorDiv.textContent = 'Файл должен быть изображением';
+                fileErrorDiv.style.display = 'block';
+                isValid = false;
+            } else if (file.size > 5 * 1024 * 1024) { // 5MB лимит
+                fileErrorDiv.textContent = 'Размер файла не должен превышать 5MB';
+                fileErrorDiv.style.display = 'block';
+                isValid = false;
+            }
+            
+            if (!isValid) return;
+            
+            
+
+            console.log(name)
+            console.log(description)
+            console.log(file)
+            
+            
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('name', name);  // Добавляем в тело формы
+            formData.append('description', description);  // Добавляем в тело формы
+            console
+
+
+             try {
+                const response = await fetch(`/posts/{{post_id}}`, {
+                    method: 'PUT',
+                    body: formData,
+                    // НЕ УСТАНАВЛИВАЕМ Content-Type ВРУЧНУЮ!
+                });
+
+                // Обработка ошибок валидации (422)
+                if (response.status === 422) {
+                    const errorData = await response.json();
+                    const errors = Object.values(errorData.detail).flat();
+                    throw new Error(errors.join(', '));
+                }
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Ошибка при публикации');
+                }
+                
+                // Успешная публикация
+                successDiv.textContent = '✓ Пост успешно обновлён';
+                successDiv.classList.add('active');
+                document.getElementById('addPostForm').reset();
+                document.getElementById('fileName').style.display = 'none';
+                document.getElementById('fileSpan').textContent = 'Выберите файл или перетащите сюда';
+                
+                setTimeout(() => {
+                    window.location.href = '/my_posts';
+                }, 1500);
+
+            } catch (error) {
+                errorDiv.textContent = error.message;
+                errorDiv.style.display = 'block';
+            }
+        });
+
+        // Обновленная обработка файлов
+        const fileInputElement = document.getElementById('file');
+        const fileSpan = document.getElementById('fileSpan');
+        const fileNameDiv = document.getElementById('fileName');
+
+        // Обработчик изменения файла
+        fileInputElement.addEventListener('change', function() {
+            if (this.files.length > 0) {
+                const file = this.files[0];
+                fileSpan.textContent = 'Файл выбран';
+                fileNameDiv.textContent = file.name;
+                fileNameDiv.style.display = 'block';
+            } else {
+                fileSpan.textContent = 'Выберите файл или перетащите сюда';
+                fileNameDiv.style.display = 'none';
+            }
+        });
+
+        // Drag and drop для файла
+        const fileInputContainer = document.querySelector('.file-input');
+
+        fileInputContainer.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            fileInputContainer.style.borderColor = '#818cf8';
+        });
+
+        fileInputContainer.addEventListener('dragleave', () => {
+            fileInputContainer.style.borderColor = '#475569';
+        });
+
+        fileInputContainer.addEventListener('drop', (e) => {
+            e.preventDefault();
+            const file = e.dataTransfer.files[0];
+            if (file) {
+                // Обновляем файловый инпут
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(file);
+                fileInputElement.files = dataTransfer.files;
+                
+                // Триггерим событие change
+                const event = new Event('change', { bubbles: true });
+                fileInputElement.dispatchEvent(event);
+            }
+            fileInputContainer.style.borderColor = '#475569';
+        });
+    </script>
+</body>
+</html>
